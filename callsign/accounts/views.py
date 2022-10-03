@@ -1,31 +1,32 @@
 from django.shortcuts import render, redirect
-
+from .models import Member
 from django.contrib import auth
 
 # Create your views here.
 
 
-def login(request):
-
-    if request.method == 'POST':
-        usr = request.POST['usernmae']
-        pwd = request.POST['password']
-
-        user = auth.authenticate(request,username=usr, password=pwd)
-
-        if user is not None:
-            auth.login(request,user)
-            return redirect('main:showmain')
-
-        else:
-            return render(request, 'logim.html')
-
-
-
-    elif request.method == 'GET':
-        return render(request, 'login.html')
-
 
 def logout(request):
     auth.logout(request)
-    return redirect('main:showmain')
+    return redirect('/')
+
+def mypage(request):
+    user = request.user
+    member = Member.objects.get(user=user)
+    context = {
+        'member':member,
+        }
+    return render(request, 'accounts/mypage.html', context)
+
+def newinfo(request):
+    return render(request, 'accounts/information.html')
+
+def information(request):
+    user= request.user
+    new_info = Member()
+    new_info.user = request.user
+    new_info.name = request.POST['name']
+    new_info.gender = request.POST['gender']
+    new_info.sports = request.POST['sports']
+    new_info.save()
+    return redirect('accounts:mypage')
